@@ -1,8 +1,10 @@
 import string
 import random
 
-from flask import render_template
+from flask import redirect, render_template
 
+from .forms import URLMapForm
+from .models import URLMap
 from yacut import app, db, ID_MAX_LENGTH, MIN_LENGTH
 
 
@@ -21,9 +23,14 @@ def get_unique_short_id():
     )
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index_view():
-    return render_template('index.html')
+    form = URLMapForm()
+    return render_template('index.html', form=form)
+
+@app.route('/')
+def redirect_view():
+    return redirect('ya.ru') # TODO Заглушка. Переделать.
 
 
 if __name__ == '__main__':
