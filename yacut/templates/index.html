@@ -16,11 +16,18 @@
               {{ form.original_link(class='form-control form-control-lg py-2 mb-3',
                 placeholder=form.original_link.label.text) }}
               <p>
-              {% if form.original_link.errors %}
-                {% for error in form.original_link.errors %}
-                  <span style='color: red'>{{ error }}</span>
-                {% endfor %}
-              {% endif %}
+                {% if form.original_link.errors %}
+                  {% for error in form.original_link.errors %}
+                    <span style='color: red'>{{ error }}</span>
+                  {% endfor %}
+                {% endif %}
+                {% with messages = get_flashed_messages(category_filter=['original']) %}
+                  {% if messages %}
+                    {% for message in messages %}
+                      <span style='color: red'>{{ message }}</span>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
               </p>
               {{ form.custom_id(class='form-control form-control-lg py-2 mb-3',
                 placeholder=form.custom_id.label.text) }}
@@ -30,6 +37,13 @@
                     <span style='color: red'>{{ error }}</span>
                   {% endfor %}
                 {% endif %}
+                {% with messages = get_flashed_messages(category_filter=['short']) %}
+                  {% if messages %}
+                    {% for message in messages %}
+                      <span style='color: red'>{{ message }}</span>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
               </p>
               {{ form.submit(class='btn btn-primary') }}
             </form>
@@ -41,12 +55,14 @@
           <div class='col-sm'>
           </div>
           <div class='col-sm'>
-            <p class='text-center'>
-              <h5 class='text-center'>Ваша новая ссылка готова:</h5>
-              <a href='{{ url_for('redirect_view', _external=True) }}'>
-                {{ url_for('redirect_view', _external=True) }}
-              </a>
-            </p>
+            {% if url_map %}
+              <p class='text-center'>
+                <h5 class='text-center'>Ваша новая ссылка готова:</h5>
+                <a href='{{ url_for('redirect_view', custom_id=url_map.short, _external=True) }}'>
+                  {{ url_for('redirect_view', custom_id=url_map.short, _external=True) }}
+                </a>
+              </p>
+            {% endif %}
           </div>
           <div class='col-sm'>
           </div>
