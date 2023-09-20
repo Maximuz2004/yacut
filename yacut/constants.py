@@ -43,6 +43,8 @@ SHORT_LINK_EXIST_MESSAGE_API = 'Имя "{short}" уже занято.'
 SHORT_LINK_TAG = 'short'
 ORIGINAL_LINK_TAG = 'original'
 # api_view
+GET_URL_ROUTE = '/api/id/<string:short_id>/'
+CREATE_ID_ROUTE = '/api/id/'
 NO_DATA_MESSAGE = 'Отсутствует тело запроса'
 NO_URL_IN_REQUEST_MESSAGE = '\"url\" является обязательным полем!'
 INVALID_CUSTOM_ID = 'Указано недопустимое имя для короткой ссылки'

@@ -6,7 +6,8 @@ from flask import abort
 from sqlalchemy.exc import SQLAlchemyError
 
 from .constants import (DB_FULL_MESSAGE, ID_MAX_LENGTH, INVALID_CUSTOM_ID,
-                        MAX_QUANTITY_DB_ITEMS, MIN_LENGTH, SHORT_LINK_EXIST_MESSAGE_API,
+                        INVALID_ORIGINAL_LINK_MESSAGE, MAX_QUANTITY_DB_ITEMS,
+                        MIN_LENGTH, SHORT_LINK_EXIST_MESSAGE_API,
                         SHORT_PATTERN, URL_PATTERN)
 from .error_handlers import InvalidAPIUsage
 from .models import URLMap
@@ -15,6 +16,7 @@ from .models import URLMap
 ERROR_MESSAGES = {
     'invalid_length': INVALID_CUSTOM_ID,
     'invalid_chars': INVALID_CUSTOM_ID,
+    'invalid_original': INVALID_ORIGINAL_LINK_MESSAGE,
     'short_link_exist': SHORT_LINK_EXIST_MESSAGE_API,
     'db_full': DB_FULL_MESSAGE,
 
@@ -56,9 +58,18 @@ SHORT_VALIDATORS = [
     (already_exist, 'short_link_exist'),
     (is_db_full, 'db_full')
 ]
+ORIGINAL_VALIDATORS = [
+    (is_valid_url, 'invalid_original'),
+]
 
 
 def validate_short(short):
     for validator, error_key in SHORT_VALIDATORS:
         if not validator(short):
             raise InvalidAPIUsage(ERROR_MESSAGES.get(error_key).format(short=short))
+
+
+def validate_original(original):
+    for validator, error_key in ORIGINAL_VALIDATORS:
+        if not validator(original):
+            raise InvalidAPIUsage(ERROR_MESSAGES.get(error_key))
