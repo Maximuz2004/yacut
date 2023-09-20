@@ -12,7 +12,7 @@ from .error_handlers import InvalidAPIUsage
 from .models import URLMap
 from .utils import get_unique_short_id, save_to_db
 from .validators import (already_exist, is_correct_chars, is_correct_len,
-                        is_db_full, is_valid_url)
+                        is_db_full, is_valid_url, validate_short)
 
 
 @app.route('/api/id/', methods=['POST'])
@@ -27,14 +27,7 @@ def create_id():
         raise InvalidAPIUsage(INVALID_ORIGINAL_LINK_MESSAGE)
     short = data.get(REQUEST_FIELDS.short)
     if short:
-        if not is_correct_len(short, MIN_LENGTH, ID_MAX_LENGTH):
-            raise InvalidAPIUsage(INVALID_CUSTOM_ID)
-        elif not is_correct_chars(short):
-            raise InvalidAPIUsage(INVALID_CUSTOM_ID)
-        elif already_exist(short):
-            raise InvalidAPIUsage(SHORT_LINK_EXIST_MESSAGE_API.format(short))
-        elif is_db_full():
-            raise InvalidAPIUsage(DB_FULL_MESSAGE)
+        validate_short(short)
     else:
         short = get_unique_short_id()
     url_map = URLMap()

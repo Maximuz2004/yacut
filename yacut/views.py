@@ -20,10 +20,10 @@ def index_view():
     short = form.custom_id.data
     if not short:
         short = get_unique_short_id()
-    elif already_exist(short):
+    elif not already_exist(short):
         flash(SHORT_LINK_EXIST_MESSAGE.format(short), SHORT_LINK_TAG)
         return render_template(INDEX_PAGE, form=form)
-    elif is_db_full():
+    elif not is_db_full(short):
         flash(DB_FULL_MESSAGE, SHORT_LINK_TAG)
     url_map = URLMap(
         original = original,

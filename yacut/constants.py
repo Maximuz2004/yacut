@@ -39,7 +39,7 @@ DB_FULL_MESSAGE = 'База данных заполнена. Обратитес�
 INDEX_PAGE = 'index.html'
 
 SHORT_LINK_EXIST_MESSAGE = 'Имя {} уже занято!'
-SHORT_LINK_EXIST_MESSAGE_API = 'Имя "{}" уже занято.'
+SHORT_LINK_EXIST_MESSAGE_API = 'Имя "{short}" уже занято.'
 SHORT_LINK_TAG = 'short'
 ORIGINAL_LINK_TAG = 'original'
 # api_view
