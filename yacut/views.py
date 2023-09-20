@@ -2,7 +2,8 @@ from flask import flash, redirect, render_template, url_for
 
 from . import app
 
-from .constants import (DB_FULL_MESSAGE, INDEX_PAGE, SHORT_LINK_EXIST_MESSAGE,
+from .constants import (DB_FULL_MESSAGE, INDEX_PAGE, INDEX_ROUTE,
+                        REDIRECT_ROUTE, SHORT_LINK_EXIST_MESSAGE,
                         SHORT_LINK_TAG)
 from .forms import URLMapForm
 from .models import URLMap
@@ -10,8 +11,7 @@ from .utils import get_unique_short_id, save_to_db
 from .validators import already_exist, is_db_full
 
 
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route(INDEX_ROUTE, methods=['GET', 'POST'])
 def index_view():
     form = URLMapForm()
     if not form.validate_on_submit():
@@ -26,8 +26,8 @@ def index_view():
     elif not is_db_full(short):
         flash(DB_FULL_MESSAGE, SHORT_LINK_TAG)
     url_map = URLMap(
-        original = original,
-        short = short
+        original=original,
+        short=short
     )
     save_to_db(url_map)
     form.custom_id.data = None
@@ -42,7 +42,7 @@ def index_view():
     )
 
 
-@app.route('/<string:custom_id>')
+@app.route(REDIRECT_ROUTE)
 def redirect_view(custom_id):
     return redirect(
         URLMap.query.filter_by(short=custom_id).first_or_404().original

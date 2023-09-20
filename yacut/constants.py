@@ -4,9 +4,7 @@ import string
 
 
 AVAILABLE_CHARS = (
-        string.ascii_lowercase
-        + string.ascii_uppercase
-        + string.digits
+    string.ascii_lowercase + string.ascii_uppercase + string.digits
 )
 
 MIN_LENGTH = 1
@@ -35,9 +33,10 @@ INVALID_SHORT_MESSAGE = ('Короткая ссылка может содерж�
 REQUIRED_FIELD_MESSAGE = 'Обязательное поле'
 SUBMIT_LABEL = 'Создать'
 # view
-DB_FULL_MESSAGE = 'База данных заполнена. Обратитесь в службу поддержки.'
+INDEX_ROUTE = '/'
+REDIRECT_ROUTE = '/<string:custom_id>'
 INDEX_PAGE = 'index.html'
-
+DB_FULL_MESSAGE = 'База данных заполнена. Обратитесь в службу поддержки.'
 SHORT_LINK_EXIST_MESSAGE = 'Имя {} уже занято!'
 SHORT_LINK_EXIST_MESSAGE_API = 'Имя "{short}" уже занято.'
 SHORT_LINK_TAG = 'short'
@@ -50,3 +49,4 @@ NO_URL_IN_REQUEST_MESSAGE = '\"url\" является обязательным �
 INVALID_CUSTOM_ID = 'Указано недопустимое имя для короткой ссылки'
 NO_SHORT_FOUND_MESSAGE = 'Указанный id не найден'
 ID_PATTERN = re.compile(SHORT_PATTERN)
+SERVER_ISSUE_ERROR = 'Неполадки на сервере, попробуйте попозже'

@@ -5,7 +5,8 @@ from flask import abort
 from sqlalchemy.exc import SQLAlchemyError
 
 from . import db
-from .constants import AVAILABLE_CHARS, ID_MAX_LENGTH
+from .constants import AVAILABLE_CHARS, ID_MAX_LENGTH, SERVER_ISSUE_ERROR
+from .error_handlers import InvalidAPIUsage
 from .models import URLMap
 
 
@@ -21,10 +22,16 @@ def get_unique_short_id():
             abort(HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
-def save_to_db(object):
+def save_to_db(object, error_type=None):
     try:
         db.session.add(object)
         db.session.commit()
     except SQLAlchemyError:
         db.session.rollback()
-        abort(HTTPStatus.INTERNAL_SERVER_ERROR)
+        if error_type == 'api':
+            raise InvalidAPIUsage(
+                SERVER_ISSUE_ERROR,
+                HTTPStatus.INTERNAL_SERVER_ERROR
+            )
+        else:
+            abort(HTTPStatus.INTERNAL_SERVER_ERROR)

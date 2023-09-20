@@ -8,7 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from .constants import (DB_FULL_MESSAGE, ID_MAX_LENGTH, INVALID_CUSTOM_ID,
                         INVALID_ORIGINAL_LINK_MESSAGE, MAX_QUANTITY_DB_ITEMS,
                         MIN_LENGTH, SHORT_LINK_EXIST_MESSAGE_API,
-                        SHORT_PATTERN, URL_PATTERN)
+                        SERVER_ISSUE_ERROR, SHORT_PATTERN, URL_PATTERN)
 from .error_handlers import InvalidAPIUsage
 from .models import URLMap
 
@@ -23,32 +23,38 @@ ERROR_MESSAGES = {
 }
 
 
-def is_db_full(useless):
+def is_db_full(useless, error_type=None):
     try:
         return not URLMap.query.count() >= MAX_QUANTITY_DB_ITEMS
     except SQLAlchemyError:
-        abort(HTTPStatus.INTERNAL_SERVER_ERROR)
+        if error_type == 'api':
+            raise InvalidAPIUsage(
+                SERVER_ISSUE_ERROR,
+                HTTPStatus.INTERNAL_SERVER_ERROR
+            )
+        else:
+            abort(HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
-def already_exist(short):
+def already_exist(short, error_type=None):
     try:
         return not bool(URLMap.query.filter_by(short=short).first())
     except SQLAlchemyError:
         abort(HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
-def is_valid_url(url):
+def is_valid_url(url, error_type=None):
     if URL_PATTERN.match(url):
         return True
     else:
         return False
 
 
-def is_correct_len(input_str):
+def is_correct_len(input_str, error_type=None):
     return MIN_LENGTH <= len(input_str) <= ID_MAX_LENGTH
 
 
-def is_correct_chars(input_string):
+def is_correct_chars(input_string, error_type=None):
     return re.match(SHORT_PATTERN, input_string)
 
 
@@ -66,10 +72,12 @@ ORIGINAL_VALIDATORS = [
 def validate_short(short):
     for validator, error_key in SHORT_VALIDATORS:
         if not validator(short):
-            raise InvalidAPIUsage(ERROR_MESSAGES.get(error_key).format(short=short))
+            raise InvalidAPIUsage(
+                ERROR_MESSAGES.get(error_key).format(short=short)
+            )
 
 
 def validate_original(original):
     for validator, error_key in ORIGINAL_VALIDATORS:
-        if not validator(original):
+        if not validator(original, error_type='api'):
             raise InvalidAPIUsage(ERROR_MESSAGES.get(error_key))
