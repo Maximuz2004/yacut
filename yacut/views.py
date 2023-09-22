@@ -2,13 +2,13 @@ from flask import flash, redirect, render_template, url_for
 
 from . import app
 
-from .constants import (DB_FULL_MESSAGE, INDEX_PAGE, INDEX_ROUTE,
-                        REDIRECT_ROUTE, SHORT_LINK_EXIST_MESSAGE,
-                        SHORT_LINK_TAG)
+from .constants import (
+    INDEX_PAGE, INDEX_ROUTE, REDIRECT_ROUTE, REDIRECT_VIEW, SHORT_LINK_TAG
+)
+
 from .forms import URLMapForm
 from .models import URLMap
-from .utils import get_unique_short_id, save_to_db
-from .validators import already_exist, is_db_full
+# from .validators import already_exist
 
 
 @app.route(INDEX_ROUTE, methods=['GET', 'POST'])
@@ -18,24 +18,13 @@ def index_view():
         return render_template(INDEX_PAGE, form=form)
     original = form.original_link.data
     short = form.custom_id.data
-    if not short:
-        short = get_unique_short_id()
-    elif not already_exist(short):
-        flash(SHORT_LINK_EXIST_MESSAGE.format(short), SHORT_LINK_TAG)
-        return render_template(INDEX_PAGE, form=form)
-    elif not is_db_full(short):
-        flash(DB_FULL_MESSAGE, SHORT_LINK_TAG)
-    url_map = URLMap(
-        original=original,
-        short=short
-    )
-    save_to_db(url_map)
+    url_map = URLMap.create_url_map(original, short)
     form.custom_id.data = None
     return render_template(
         INDEX_PAGE,
         form=form,
         short=url_for(
-            'redirect_view',
+            REDIRECT_VIEW,
             custom_id=url_map.short,
             _external=True
         )
@@ -45,5 +34,5 @@ def index_view():
 @app.route(REDIRECT_ROUTE)
 def redirect_view(custom_id):
     return redirect(
-        URLMap.query.filter_by(short=custom_id).first_or_404().original
+        URLMap.get_original_link_or_404(custom_id)
     )
