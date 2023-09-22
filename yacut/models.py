@@ -6,12 +6,10 @@ from flask import url_for
 from . import db
 from .constants import (
     ATTEMPTS_COUNT, AVAILABLE_CHARS, ID_MAX_LENGTH, INVALID_CUSTOM_ID,
-    INVALID_ORIGINAL_LINK_LENGTH, REDIRECT_VIEW, SHORT_LINK_EXIST_MESSAGE,
+    INVALID_ORIGINAL_LINK_LENGTH, REDIRECT_VIEW, SHORT_ID_NOT_FOUND_MESSAGE,
     SHORT_LINK_EXIST_MESSAGE_API, URL_MAX_LENGTH
 )
 from .error_handlers import InvalidAPIUsage
-
-SHORT_ID_NOT_FOUND_MESSAGE = 'Короткая ссылка не найдена!'
 
 
 class URLMap(db.Model):
@@ -71,12 +69,6 @@ class URLMap(db.Model):
         if cls.get_original_link(short):
             raise InvalidAPIUsage(SHORT_LINK_EXIST_MESSAGE_API.format(short))
         return original, short
-    #
-    # @classmethod
-    # def validate_form(cls, original, short):
-    #     # if cls.get_original_link(short):
-    #     #     raise ValueError(SHORT_LINK_EXIST_MESSAGE.format(short))
-    #     return original, short
 
     @staticmethod
     def get_unique_short_id():

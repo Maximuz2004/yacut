@@ -5,9 +5,9 @@ from wtforms.validators import (
 )
 
 from .constants import (
-    ID_MAX_LENGTH, INVALID_ORIGINAL_LINK_MESSAGE, INVALID_SHORT_MESSAGE,
-    ORIGINAL_LABEL, REQUIRED_FIELD_MESSAGE, SHORT_LABEL,
-    SHORT_LINK_EXIST_MESSAGE, SHORT_PATTERN, SUBMIT_LABEL, URL_MAX_LENGTH
+    AVAILABLE_CHARS, ID_MAX_LENGTH, INVALID_ORIGINAL_LINK_MESSAGE,
+    INVALID_SHORT_MESSAGE, ORIGINAL_LABEL, REQUIRED_FIELD_MESSAGE, SHORT_LABEL,
+    SHORT_LINK_EXIST_MESSAGE, SUBMIT_LABEL, URL_MAX_LENGTH
 )
 from .models import URLMap
 
@@ -26,7 +26,7 @@ class URLMapForm(FlaskForm):
         validators=[
             Length(max=ID_MAX_LENGTH),
             Regexp(
-                SHORT_PATTERN,
+                rf'^[{AVAILABLE_CHARS}]+$',
                 message=INVALID_SHORT_MESSAGE
             ),
             Optional()

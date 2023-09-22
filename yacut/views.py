@@ -1,14 +1,11 @@
-from flask import flash, redirect, render_template, url_for
+from flask import redirect, render_template, url_for
 
 from . import app
 
-from .constants import (
-    INDEX_PAGE, INDEX_ROUTE, REDIRECT_ROUTE, REDIRECT_VIEW, SHORT_LINK_TAG
-)
+from .constants import INDEX_PAGE, INDEX_ROUTE, REDIRECT_ROUTE, REDIRECT_VIEW
 
 from .forms import URLMapForm
 from .models import URLMap
-# from .validators import already_exist
 
 
 @app.route(INDEX_ROUTE, methods=['GET', 'POST'])

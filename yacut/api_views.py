@@ -3,9 +3,11 @@ from http import HTTPStatus
 from flask import jsonify, request
 
 from . import app
-from .constants import (GET_URL_ROUTE, CREATE_ID_ROUTE, NO_DATA_MESSAGE,
-                        NO_URL_IN_REQUEST_MESSAGE, NO_SHORT_FOUND_MESSAGE,
-                        REQUEST_FIELDS)
+from .constants import (
+    GET_URL_ROUTE, CREATE_ID_ROUTE, NO_DATA_MESSAGE,
+    NO_URL_IN_REQUEST_MESSAGE, NO_SHORT_FOUND_MESSAGE,
+    REQUEST_FIELDS
+)
 from .error_handlers import InvalidAPIUsage
 from .models import URLMap
 

@@ -1,5 +1,4 @@
 from collections import namedtuple
-import re
 import string
 
 AVAILABLE_CHARS = (
@@ -7,18 +6,10 @@ AVAILABLE_CHARS = (
 )
 
 ATTEMPTS_COUNT = 10
-MIN_LENGTH = 1  # TODO Удалить. Проверить модули
 ID_MAX_LENGTH = 6
 URL_MAX_LENGTH = 2048
-URL_PATTERN = re.compile(r'^(https?://)?([a-zA-Z0-9.-]+)(/.*)?')
-SHORT_PATTERN = r'^[a-zA-Z0-9]+$'
+SHORT_ID_NOT_FOUND_MESSAGE = 'Короткая ссылка не найдена!'
 
-MAX_QUANTITY_DB_ITEMS = sum(
-    [
-        len(AVAILABLE_CHARS) ** current_len
-        for current_len in range(1, ID_MAX_LENGTH + 1)
-    ]
-)
 MODEL_FIELDS = namedtuple(
     'Fields',
     ['id', 'original', 'short', 'timestamp']
@@ -28,7 +19,7 @@ REDIRECT_VIEW = 'redirect_view'
 # form
 ORIGINAL_LABEL = 'Длинная ссылка'
 SHORT_LABEL = 'Ваш вариант короткой ссылки'
-INVALID_ORIGINAL_LINK_MESSAGE = 'Некорректная длинная ссылка' #  TODO на удаление
+INVALID_ORIGINAL_LINK_MESSAGE = 'Некорректная длинная ссылка'
 INVALID_SHORT_MESSAGE = ('Короткая ссылка может содержать только '
                          'латинские  буквы и цифры в диапазоне от 0 до 9')
 REQUIRED_FIELD_MESSAGE = 'Обязательное поле'
@@ -52,5 +43,4 @@ INVALID_ORIGINAL_LINK_LENGTH = ('Ссылка не может быть длин�
                                 ' {max_length} символов, ваша длинна: '
                                 '{current_length} символов')
 NO_SHORT_FOUND_MESSAGE = 'Указанный id не найден'
-ID_PATTERN = re.compile(SHORT_PATTERN)
 SERVER_ISSUE_ERROR = 'Неполадки на сервере, попробуйте попозже'
