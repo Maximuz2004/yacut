@@ -5,11 +5,18 @@ from wtforms.validators import (
 )
 
 from .constants import (
-    AVAILABLE_CHARS, ID_MAX_LENGTH, INVALID_ORIGINAL_LINK_MESSAGE,
-    INVALID_SHORT_MESSAGE, ORIGINAL_LABEL, REQUIRED_FIELD_MESSAGE, SHORT_LABEL,
-    SHORT_LINK_EXIST_MESSAGE, SUBMIT_LABEL, URL_MAX_LENGTH
+    AVAILABLE_CHARS_REGEX, SHORT_MAX_LENGTH, URL_MAX_LENGTH
 )
 from .models import URLMap
+
+ORIGINAL_LABEL = 'Длинная ссылка'
+SHORT_LABEL = 'Ваш вариант короткой ссылки'
+INVALID_ORIGINAL_LINK_MESSAGE = 'Некорректная длинная ссылка'
+INVALID_SHORT_MESSAGE = ('Короткая ссылка может содержать только '
+                         'латинские  буквы и цифры в диапазоне от 0 до 9')
+REQUIRED_FIELD_MESSAGE = 'Обязательное поле'
+SUBMIT_LABEL = 'Создать'
+SHORT_LINK_EXIST_MESSAGE = 'Имя {} уже занято!'
 
 
 class URLMapForm(FlaskForm):
@@ -24,9 +31,9 @@ class URLMapForm(FlaskForm):
     custom_id = StringField(
         SHORT_LABEL,
         validators=[
-            Length(max=ID_MAX_LENGTH),
+            Length(max=SHORT_MAX_LENGTH),
             Regexp(
-                rf'^[{AVAILABLE_CHARS}]+$',
+                AVAILABLE_CHARS_REGEX,
                 message=INVALID_SHORT_MESSAGE
             ),
             Optional()
@@ -36,5 +43,5 @@ class URLMapForm(FlaskForm):
 
     def validate_custom_id(self, custom_id):
         short = custom_id.data
-        if URLMap.get_original_link(short):
+        if URLMap.get_url_map(short):
             raise ValidationError(SHORT_LINK_EXIST_MESSAGE.format(short))

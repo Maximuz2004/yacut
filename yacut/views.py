@@ -1,11 +1,15 @@
-from flask import redirect, render_template, url_for
+from flask import flash, redirect, render_template, url_for
 
 from . import app
 
-from .constants import INDEX_PAGE, INDEX_ROUTE, REDIRECT_ROUTE, REDIRECT_VIEW
-
+from .constants import REDIRECT_VIEW
 from .forms import URLMapForm
 from .models import URLMap
+
+INDEX_ROUTE = '/'
+INDEX_PAGE = 'index.html'
+REDIRECT_ROUTE = '/<string:custom_id>'
+SHORT_LINK_TAG = 'short'
 
 
 @app.route(INDEX_ROUTE, methods=['GET', 'POST'])
@@ -15,8 +19,10 @@ def index_view():
         return render_template(INDEX_PAGE, form=form)
     original = form.original_link.data
     short = form.custom_id.data
-    url_map = URLMap.create_url_map(original, short)
-    form.custom_id.data = None
+    try:
+        url_map = URLMap.create(original, short, validate_api=False)
+    except ValueError as error:
+        flash(error.args[0], SHORT_LINK_TAG)
     return render_template(
         INDEX_PAGE,
         form=form,

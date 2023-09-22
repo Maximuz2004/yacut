@@ -1,3 +1,5 @@
+from re import sub
+
 from datetime import datetime
 import random
 
@@ -5,11 +7,15 @@ from flask import url_for
 
 from . import db
 from .constants import (
-    ATTEMPTS_COUNT, AVAILABLE_CHARS, ID_MAX_LENGTH, INVALID_CUSTOM_ID,
-    INVALID_ORIGINAL_LINK_LENGTH, REDIRECT_VIEW, SHORT_ID_NOT_FOUND_MESSAGE,
-    SHORT_LINK_EXIST_MESSAGE_API, URL_MAX_LENGTH
+    ATTEMPTS_COUNT, AVAILABLE_CHARS, AVAILABLE_CHARS_REGEX, SHORT_MAX_LENGTH,
+    REDIRECT_VIEW,
+    SHORT_ID_NOT_FOUND_MESSAGE, URL_MAX_LENGTH
 )
-from .error_handlers import InvalidAPIUsage
+
+SHORT_LINK_EXIST_MESSAGE_API = 'Имя "{}" уже занято.'
+INVALID_SHORT = ('Указано недопустимое имя для короткой ссылки')
+INVALID_ORIGINAL_LINK_LENGTH = (f'Ссылка не может быть длинной больше чем'
+                                f' {URL_MAX_LENGTH} символов')
 
 
 class URLMap(db.Model):
@@ -20,7 +26,7 @@ class URLMap(db.Model):
         index=True,
     )
     short = db.Column(
-        db.String(ID_MAX_LENGTH),
+        db.String(SHORT_MAX_LENGTH),
         nullable=False,
         index=True,
         unique=True
@@ -40,43 +46,38 @@ class URLMap(db.Model):
             )
         )
 
-    @classmethod
-    def create_url_map(cls, original, short=None):
+    @staticmethod
+    def create(original, short=None, validate_api=True):
         if short is None or short == '':
             short = URLMap.get_unique_short_id()
-        cls.validate_api(original, short)
-        instance = cls(original=original, short=short)
+        elif validate_api:
+            short_length = len(short)
+            if short_length > SHORT_MAX_LENGTH:
+                raise ValueError(INVALID_SHORT)
+            incorrect_chars = sub(AVAILABLE_CHARS_REGEX, '', short)
+            if incorrect_chars:
+                raise ValueError(INVALID_SHORT)
+            if URLMap.get_url_map(short):
+                raise ValueError(SHORT_LINK_EXIST_MESSAGE_API.format(short))
+        original_length = len(original)
+        if original_length > URL_MAX_LENGTH:
+            raise ValueError(
+                INVALID_ORIGINAL_LINK_LENGTH.format(
+                    current_length=original_length
+                )
+            )
+        instance = URLMap(original=original, short=short)
         db.session.add(instance)
         db.session.commit()
         return instance
 
-    @classmethod
-    def validate_api(cls, original, short):
-        short_length = len(short)
-        original_length = len(original)
-        if short_length > ID_MAX_LENGTH:
-            raise InvalidAPIUsage(INVALID_CUSTOM_ID)
-        if original_length > URL_MAX_LENGTH:
-            raise InvalidAPIUsage(
-                INVALID_ORIGINAL_LINK_LENGTH.format(
-                    max_length=URL_MAX_LENGTH,
-                    current_length=original_length
-                )
-            )
-        incorrect_chars = set(short).difference(set(AVAILABLE_CHARS))
-        if incorrect_chars:
-            raise InvalidAPIUsage(INVALID_CUSTOM_ID)
-        if cls.get_original_link(short):
-            raise InvalidAPIUsage(SHORT_LINK_EXIST_MESSAGE_API.format(short))
-        return original, short
-
     @staticmethod
     def get_unique_short_id():
         for _ in range(ATTEMPTS_COUNT):
-            short_id = ''.join(
-                random.choices(AVAILABLE_CHARS, k=ID_MAX_LENGTH))
-            if not URLMap.query.filter_by(short=short_id).first():
-                return short_id
+            short = ''.join(
+                random.choices(AVAILABLE_CHARS, k=SHORT_MAX_LENGTH))
+            if not URLMap.get_url_map(short):
+                return short
         raise ValueError(SHORT_ID_NOT_FOUND_MESSAGE)
 
     @staticmethod
@@ -84,5 +85,5 @@ class URLMap(db.Model):
         return URLMap.query.filter_by(short=short).first_or_404().original
 
     @staticmethod
-    def get_original_link(short):
+    def get_url_map(short):
         return URLMap.query.filter_by(short=short).first()
