@@ -15,7 +15,7 @@ SHORT_NOT_FOUND_MESSAGE = 'Короткая ссылка не найдена!'
 INVALID_SHORT = ('Указано недопустимое имя для короткой ссылки')
 INVALID_ORIGINAL_LINK_LENGTH = ('Ссылка не может быть длинной больше чем'
                                 f' {URL_MAX_LENGTH} символов, ваша длинна:'
-                                f' {{}} символов')
+                                ' {} символов')
 
 
 class GenerateShortError(Exception):
@@ -62,12 +62,12 @@ class URLMap(db.Model):
                 raise ValueError(INVALID_SHORT)
             if URLMap.get(short):
                 raise ValueError(SHORT_EXIST_MESSAGE.format(short))
-            if (original_length := len(original)) > URL_MAX_LENGTH:
-                raise ValueError(
-                    INVALID_ORIGINAL_LINK_LENGTH.format(original_length)
-                )
             if URLMap.get(short):
                 raise ValueError(SHORT_EXIST_MESSAGE.format(short))
+        if (original_length := len(original)) > URL_MAX_LENGTH:
+            raise ValueError(
+                INVALID_ORIGINAL_LINK_LENGTH.format(original_length)
+            )
         instance = URLMap(original=original, short=short)
         db.session.add(instance)
         db.session.commit()

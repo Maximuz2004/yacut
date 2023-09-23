@@ -25,6 +25,7 @@ def index_view():
         )
     except (ValueError, GenerateShortError) as error:
         flash(str(error))
+        return render_template(INDEX_PAGE, form=form)
     return render_template(
         INDEX_PAGE,
         form=form,
