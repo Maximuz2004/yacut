@@ -56,8 +56,8 @@ class URLMap(db.Model):
             short = URLMap.get_unique_short_id()
         elif validate:
             if (
-                    len(short) > SHORT_MAX_LENGTH
-                    or not search(AVAILABLE_CHARS_REGEX, short)
+                len(short) > SHORT_MAX_LENGTH or
+                not search(AVAILABLE_CHARS_REGEX, short)
             ):
                 raise ValueError(INVALID_SHORT)
             if URLMap.get(short):
