@@ -5,7 +5,7 @@ from flask import jsonify, request
 
 from . import app
 from .error_handlers import InvalidAPIUsage
-from .models import ShortNotFoundError, URLMap
+from .models import GenerateShortError, URLMap
 
 GET_URL_ROUTE = '/api/id/<string:short_id>/'
 CREATE_ID_ROUTE = '/api/id/'
@@ -31,9 +31,7 @@ def create_id():
         return jsonify(
             URLMap.create(original, data.get(REQUEST_FIELDS.short)).to_dict()
         ), HTTPStatus.CREATED
-    except ValueError as error:
-        raise InvalidAPIUsage(str(error))
-    except ShortNotFoundError as error:
+    except (ValueError, GenerateShortError) as error:
         raise InvalidAPIUsage(str(error))
 
 

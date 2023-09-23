@@ -1,24 +1,24 @@
-from re import sub
-
 from datetime import datetime
+from re import search
 import random
 
 from flask import url_for
 
 from . import db
 from .constants import (
-    ATTEMPTS_COUNT, AVAILABLE_CHARS, AVAILABLE_CHARS_REGEX, SHORT_MAX_LENGTH,
-    REDIRECT_VIEW, URL_MAX_LENGTH
+    ATTEMPTS_COUNT, AVAILABLE_CHARS, AVAILABLE_CHARS_REGEX, REDIRECT_VIEW,
+    SHORT_MAX_LENGTH, URL_MAX_LENGTH
 )
 
 SHORT_EXIST_MESSAGE = 'Имя "{}" уже занято.'
 SHORT_NOT_FOUND_MESSAGE = 'Короткая ссылка не найдена!'
 INVALID_SHORT = ('Указано недопустимое имя для короткой ссылки')
 INVALID_ORIGINAL_LINK_LENGTH = ('Ссылка не может быть длинной больше чем'
-                                ' {} символов, ваша длинна: {} символов')
+                                f' {URL_MAX_LENGTH} символов, ваша длинна:'
+                                f' {{}} символов')
 
 
-class ShortNotFoundError(Exception):
+class GenerateShortError(Exception):
     pass
 
 
@@ -52,27 +52,22 @@ class URLMap(db.Model):
 
     @staticmethod
     def create(original, short=None, validate=True):
-        if validate:
-            if short:
-                if (len(short) > SHORT_MAX_LENGTH or
-                        sub(AVAILABLE_CHARS_REGEX, '', short)):
-                    raise ValueError(INVALID_SHORT)
-                if URLMap.get(short):
-                    raise ValueError(SHORT_EXIST_MESSAGE.format(short))
-            else:
-                short = URLMap.get_unique_short_id()
-            if (original_length := len(original)) > URL_MAX_LENGTH:
-                raise ValueError(
-                    INVALID_ORIGINAL_LINK_LENGTH.format(
-                        URL_MAX_LENGTH, original_length
-                    )
-                )
-            if sub(AVAILABLE_CHARS_REGEX, '', short):
+        if not short:
+            short = URLMap.get_unique_short_id()
+        elif validate:
+            if (
+                    len(short) > SHORT_MAX_LENGTH
+                    or not search(AVAILABLE_CHARS_REGEX, short)
+            ):
                 raise ValueError(INVALID_SHORT)
             if URLMap.get(short):
                 raise ValueError(SHORT_EXIST_MESSAGE.format(short))
-        elif not short:
-            short = URLMap.get_unique_short_id()
+            if (original_length := len(original)) > URL_MAX_LENGTH:
+                raise ValueError(
+                    INVALID_ORIGINAL_LINK_LENGTH.format(original_length)
+                )
+            if URLMap.get(short):
+                raise ValueError(SHORT_EXIST_MESSAGE.format(short))
         instance = URLMap(original=original, short=short)
         db.session.add(instance)
         db.session.commit()
@@ -85,7 +80,7 @@ class URLMap(db.Model):
                 random.choices(AVAILABLE_CHARS, k=SHORT_MAX_LENGTH))
             if not URLMap.get(short):
                 return short
-        raise ShortNotFoundError(SHORT_NOT_FOUND_MESSAGE)
+        raise GenerateShortError(SHORT_NOT_FOUND_MESSAGE)
 
     @staticmethod
     def get_original_link_or_404(short):
