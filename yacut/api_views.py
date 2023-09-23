@@ -36,6 +36,7 @@ def create_id():
     except ShortNotFoundError as error:
         raise InvalidAPIUsage(str(error))
 
+
 @app.route(GET_URL_ROUTE, methods=['GET'])
 def get_url(short_id):
     if not (url_map := URLMap.get(short_id)):
