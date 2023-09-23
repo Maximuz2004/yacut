@@ -17,13 +17,18 @@ def index_view():
     if not form.validate_on_submit():
         return render_template(INDEX_PAGE, form=form)
     short = form.custom_id.data
+    if not short:
+        try:
+            short = URLMap.get_unique_short_id()
+        except GenerateShortError as error:
+            flash(str(error))
     try:
         url_map = URLMap.create(
             form.original_link.data,
             short,
             validate=False
         )
-    except (ValueError, GenerateShortError) as error:
+    except ValueError as error:
         flash(str(error))
         return render_template(INDEX_PAGE, form=form)
     return render_template(

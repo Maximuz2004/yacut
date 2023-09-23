@@ -52,22 +52,21 @@ class URLMap(db.Model):
 
     @staticmethod
     def create(original, short=None, validate=True):
-        if not short:
-            short = URLMap.get_unique_short_id()
-        elif validate:
-            if (
-                len(short) > SHORT_MAX_LENGTH or
-                not search(AVAILABLE_CHARS_REGEX, short)
-            ):
-                raise ValueError(INVALID_SHORT)
-            if URLMap.get(short):
-                raise ValueError(SHORT_EXIST_MESSAGE.format(short))
-            if URLMap.get(short):
-                raise ValueError(SHORT_EXIST_MESSAGE.format(short))
-        if (original_length := len(original)) > URL_MAX_LENGTH:
-            raise ValueError(
-                INVALID_ORIGINAL_LINK_LENGTH.format(original_length)
-            )
+        if validate:
+            if (original_length := len(original)) > URL_MAX_LENGTH:
+                raise ValueError(
+                    INVALID_ORIGINAL_LINK_LENGTH.format(original_length)
+                )
+            if short:
+                if (
+                    len(short) > SHORT_MAX_LENGTH or
+                    not search(AVAILABLE_CHARS_REGEX, short)
+                ):
+                    raise ValueError(INVALID_SHORT)
+                if URLMap.get(short):
+                    raise ValueError(SHORT_EXIST_MESSAGE.format(short))
+            else:
+                short = URLMap.get_unique_short_id()
         instance = URLMap(original=original, short=short)
         db.session.add(instance)
         db.session.commit()
